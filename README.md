@@ -11,6 +11,8 @@ The site is set up for **https://dctabudhabi-smc.github.io/classicalpilates/**.
 3. In the repository, go to Settings > Pages, set Source to "Deploy from a branch", branch `main`, folder `/ (root)`, and save.
 4. The site appears at the address above after a minute or two.
 
+Clean addresses: pages are linked without `.html` (for example `/classicalpilates/about-me`) and the home page as `/classicalpilates/`. GitHub Pages serves `about-me.html` for `/about-me` automatically, so the files keep their `.html` names. If someone opens an old `.html` or `index.html` address, the page loads and the address bar is tidied to the clean form. Canonical links and the sitemap use the clean addresses.
+
 All links between pages and to images use relative paths, so the site also works from any other address. Only the canonical links, Open Graph tags, structured data, `sitemap.xml` and `robots.txt` contain the full address. When the site moves to classicalpilates.gr, change those (search and replace `https://dctabudhabi-smc.github.io/classicalpilates` with `https://classicalpilates.gr`).
 
 ## Pages

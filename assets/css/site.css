@@ -674,3 +674,9 @@ dialog.bio:not(.is-in) .bio__text > :nth-child(-n+4) { opacity: 0; transform: tr
 }
 @media (prefers-reduced-motion: reduce) { .bio__inner, .bio__text > * { transition: none !important; } }
 html.modal-open, html.modal-open body { overflow: hidden; }
+
+/* ===== v10: home studio gallery - tiles fill their grid cells exactly ===== */
+@media (min-width: 900px) {
+  .gallery .g-1, .gallery .g-8 { aspect-ratio: auto; position: relative; }
+  .gallery .g-1 img, .gallery .g-8 img { position: absolute; inset: 0; width: 100%; height: 100%; }
+}
