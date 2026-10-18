@@ -40,7 +40,7 @@ The full capture of the old pages (text, meta tags, every asset and outbound lin
 
 1. **Conference photos and video.** The photo grid on `athens-classical-pilates-conference.html` has Day 1 / Day 2 / Day 3 tabs with the event photos supplied on 18 October 2026: Day 1 has 19 (`conf-d1-*`), Day 2 has 40 (`conf-d2-*`) and Day 3 has 14 (`conf-d3-*`). To add more, copy an existing `<a … data-lightbox="conf-d3">` block inside the right tab. The conference film (`assets/video/conference-2024.mp4`, 1:20) opens in a popup from the Film section and from the "Watch the film" button in the page header. The Acropolis drone clip is still used as a silent background on the home page and the conference header.
 2. **Joseph Pilates archive photos.** The 12 archive photos and the hero portrait on the method page were supplied by the site owner on 18 October 2026. Photographer credits are not known; many historical Pilates photos are claimed under copyright, so confirm usage rights before publishing.
-3. **More photos of Roi** for the About me page, if wanted.
+3. **About me photos.** The "Moments of practice" grid has 19 photos (13 from the old site plus 6 supplied on 18 October 2026), all given the same black and white treatment (`about-bw-*`).
 4. Pilates E-Motion photos come from pilatesemotion.com. Confirm with Gloria that they can be used.
 
 ## How to add photos
