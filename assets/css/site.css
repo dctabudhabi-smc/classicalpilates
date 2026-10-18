@@ -603,3 +603,45 @@ dialog.vmodal::backdrop { background: rgba(10,2,8,.92); -webkit-backdrop-filter:
 .dark .pcard .muted { color: rgba(255,255,255,.65); }
 .dark .pcard__avatar { box-shadow: 0 0 0 4px var(--plum), 0 0 0 5px var(--orchid-soft); }
 .dark .collab__amp { color: var(--orchid-soft); }
+
+/* ===== v8: mobile smoothness, glass header, focus rings, fixes ===== */
+html, body { overflow-x: clip; }
+body { overflow-x: visible; }
+@supports not (overflow: clip) { body { overflow-x: hidden; } }
+
+/* Apple-style glass header, always visible */
+.nav { transition: background-color .45s var(--ease), box-shadow .45s var(--ease), color .45s var(--ease); transform: none !important; }
+.nav.is-solid {
+  background: rgba(251,248,245,.62);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  backdrop-filter: saturate(180%) blur(20px);
+  box-shadow: 0 .5px 0 rgba(59,20,49,.12);
+}
+@supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) { .nav.is-solid { background: rgba(251,248,245,.96); } }
+
+/* no visible focus ring for pointer/touch users in overlays; keyboard ring kept elsewhere */
+.lb__btn:focus, .bio__close:focus, .vmodal__close:focus, dialog video:focus, dialog:focus, .bio a:focus:not(:focus-visible) { outline: none; }
+.lb__btn:focus-visible, .bio__close:focus-visible, .vmodal__close:focus-visible { outline: none; box-shadow: 0 0 0 2px rgba(255,255,255,.55); }
+.vmodal__close { z-index: 3; }
+.vmodal__inner video { outline: none; border: 0; }
+
+/* sticky only on desktop */
+.sticky-d { position: static; }
+@media (min-width: 900px) { .sticky-d { position: sticky; top: 120px; } }
+.only-m { display: block; }
+.only-d { display: none; }
+@media (min-width: 900px) { .only-m { display: none; } .only-d { display: block; } }
+
+/* touch: lighter image reveal (no clip-path animation) */
+html.js.motion.touch [data-img] { clip-path: none; opacity: 0; }
+html.js.motion.touch [data-img] img { transform: scale(1.08); }
+
+/* module path line */
+.path__line { position: absolute; left: 6px; right: 14%; top: 6px; height: 1px; background: var(--orchid); transform-origin: left center; pointer-events: none; }
+.dark .path__line { background: var(--orchid-soft); }
+.path__step { position: relative; z-index: 1; }
+.path__step i { will-change: transform; }
+
+/* GPU hints for animated content */
+[data-reveal], [data-stagger] > *, .masonry__col > * { will-change: auto; }
+.hero__media img, .phero__media img, .phero__media video { will-change: transform; backface-visibility: hidden; }
