@@ -144,21 +144,38 @@
     lb.className = 'lb'; lb.setAttribute('role', 'dialog'); lb.setAttribute('aria-modal', 'true'); lb.setAttribute('aria-label', 'Photo viewer');
     lb.innerHTML = '<span class="lb__count"></span><img class="lb__img" alt=""><button class="lb__btn lb__close" aria-label="Close">&times;</button><button class="lb__btn lb__prev" aria-label="Previous">&#8592;</button><button class="lb__btn lb__next" aria-label="Next">&#8594;</button>';
     document.body.appendChild(lb);
-    var img = $('.lb__img', lb), count = $('.lb__count', lb), cur = [], idx = 0, lastFocus = null;
+    var img = $('.lb__img', lb), count = $('.lb__count', lb), cur = [], idx = 0, lastFocus = null, token = 0;
+    var cache = {};
+    var load = function (src) {
+      if (!cache[src]) {
+        cache[src] = new Promise(function (res) {
+          var im = new Image();
+          im.decoding = 'async';
+          im.onload = function () { (im.decode ? im.decode() : Promise.resolve()).then(res, res); };
+          im.onerror = res;
+          im.src = src;
+        });
+      }
+      return cache[src];
+    };
+    var srcAt = function (i) { return cur[(i + cur.length) % cur.length].getAttribute('href'); };
+    var preloadAround = function () { if (cur.length > 1) { load(srcAt(idx + 1)); load(srcAt(idx - 1)); } };
     var show = function (i, dir) {
       idx = (i + cur.length) % cur.length;
-      var a = cur[idx];
-      var src = a.getAttribute('href');
-      if (motion) {
-        gsap.to(img, { opacity: 0, x: dir ? -30 * dir : 0, duration: 0.18, onComplete: function () {
-          img.src = src; img.alt = (a.querySelector('img') || {}).alt || '';
-          gsap.fromTo(img, { opacity: 0, x: dir ? 30 * dir : 0, scale: dir ? 1 : 0.96 }, { opacity: 1, x: 0, scale: 1, duration: 0.45, ease: 'power3.out' });
-        } });
-      } else { img.src = src; }
+      var a = cur[idx], src = a.getAttribute('href'), my = ++token;
       count.textContent = (idx + 1) + ' / ' + cur.length;
+      var out = motion && dir ? gsap.to(img, { opacity: 0, x: -40 * dir, duration: 0.2, ease: 'power2.in' }) : null;
+      Promise.all([load(src), out ? new Promise(function (r) { out.eventCallback('onComplete', r); }) : Promise.resolve()]).then(function () {
+        if (my !== token) return; // a newer swipe happened
+        img.src = src; img.alt = (a.querySelector('img') || {}).alt || '';
+        if (motion) gsap.fromTo(img, { opacity: 0, x: dir ? 40 * dir : 0, scale: dir ? 1 : 0.96 }, { opacity: 1, x: 0, scale: 1, duration: 0.4, ease: 'power3.out', overwrite: true });
+        else img.style.opacity = 1;
+        preloadAround();
+      });
     };
     var open = function (g, i) {
       cur = groups[g]; lastFocus = document.activeElement;
+      img.removeAttribute('src'); if (motion) gsap.set(img, { opacity: 0, x: 0 }); else img.style.opacity = 0;
       lb.classList.add('is-open'); show(i, 0);
       if (lenis) lenis.stop(); document.body.style.overflow = 'hidden';
       $('.lb__close', lb).focus({ preventScroll: true });
@@ -180,11 +197,17 @@
       if (e.key === 'ArrowRight') show(idx + 1, 1);
       if (e.key === 'ArrowLeft') show(idx - 1, -1);
     });
-    var sx = null;
-    lb.addEventListener('touchstart', function (e) { sx = e.touches[0].clientX; }, { passive: true });
-    lb.addEventListener('touchend', function (e) {
-      if (sx === null) return; var dx = e.changedTouches[0].clientX - sx;
-      if (Math.abs(dx) > 50) show(idx + (dx < 0 ? 1 : -1), dx < 0 ? 1 : -1); sx = null;
+    var sx = null, dx = 0;
+    lb.addEventListener('touchstart', function (e) { if (e.touches.length !== 1) return; sx = e.touches[0].clientX; dx = 0; }, { passive: true });
+    lb.addEventListener('touchmove', function (e) {
+      if (sx === null) return; dx = e.touches[0].clientX - sx;
+      img.style.transform = 'translate3d(' + dx + 'px,0,0)'; img.style.opacity = String(1 - Math.min(Math.abs(dx) / 400, 0.5));
+    }, { passive: true });
+    lb.addEventListener('touchend', function () {
+      if (sx === null) return; sx = null;
+      if (Math.abs(dx) > 50) { var d = dx < 0 ? 1 : -1; if (motion) gsap.set(img, { x: dx, opacity: img.style.opacity }); else img.style.transform = ''; show(idx + d, d); }
+      else if (motion) { gsap.set(img, { x: dx }); gsap.to(img, { x: 0, opacity: 1, duration: 0.3 }); } else { img.style.transform = ''; img.style.opacity = ''; }
+      dx = 0;
     });
   })();
 
