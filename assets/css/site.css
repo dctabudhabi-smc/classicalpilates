@@ -645,3 +645,32 @@ html.js.motion.touch [data-img] img { transform: scale(1.08); }
 /* GPU hints for animated content */
 [data-reveal], [data-stagger] > *, .masonry__col > * { will-change: auto; }
 .hero__media img, .phero__media img, .phero__media video { will-change: transform; backface-visibility: hidden; }
+
+/* ===== v9: smooth biography sheet ===== */
+dialog.bio { position: fixed; inset: 0; width: 100vw; height: 100vh; height: 100lvh; overflow: hidden; }
+dialog.bio::backdrop { background: rgba(20,5,16,0); -webkit-backdrop-filter: none; backdrop-filter: none; transition: background .45s ease; }
+dialog.bio.is-in::backdrop { background: rgba(20,5,16,.7); }
+.bio__inner {
+  position: fixed; left: 0; right: 0; top: 8svh; bottom: auto; height: 92svh;
+  transform: translate3d(0, 100%, 0); transition: transform .55s cubic-bezier(.22,1,.36,1);
+  will-change: transform; backface-visibility: hidden; contain: layout paint;
+}
+dialog.bio.is-in .bio__inner { transform: translate3d(0, 0, 0); }
+dialog.bio.is-out .bio__inner { transform: translate3d(0, 100%, 0); transition-duration: .4s; transition-timing-function: cubic-bezier(.55,0,.8,.3); }
+.bio__img { position: relative; z-index: 1; background: #E9E1E6; }
+.bio__img img { opacity: 1; }
+.bio__close { position: absolute; z-index: 5; }
+.bio__text > * { transition: opacity .5s ease .2s, transform .5s cubic-bezier(.22,1,.36,1) .2s; }
+dialog.bio:not(.is-in) .bio__text > :nth-child(-n+4) { opacity: 0; transform: translate3d(0, 14px, 0); }
+@media (min-width: 900px) {
+  .bio__inner {
+    top: 0; bottom: 0; left: 0; right: 0; margin: auto;
+    width: min(1080px, 90vw); height: min(680px, 86vh);
+    transform: translate3d(0, 24px, 0) scale(.97); opacity: 0;
+    transition: transform .5s cubic-bezier(.22,1,.36,1), opacity .35s ease;
+  }
+  dialog.bio.is-in .bio__inner { transform: none; opacity: 1; }
+  dialog.bio.is-out .bio__inner { transform: translate3d(0, 12px, 0) scale(.98); opacity: 0; transition-duration: .3s; }
+}
+@media (prefers-reduced-motion: reduce) { .bio__inner, .bio__text > * { transition: none !important; } }
+html.modal-open, html.modal-open body { overflow: hidden; }

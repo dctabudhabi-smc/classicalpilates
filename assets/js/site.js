@@ -229,34 +229,43 @@
   });
 
 
-  /* ---------- biography dialogs ---------- */
+  /* ---------- biography dialogs (CSS-driven, GPU transforms only) ---------- */
   $$('.bio-open').forEach(function (btn) {
     var dlg = document.getElementById(btn.dataset.dialog);
     if (!dlg || typeof dlg.showModal !== 'function') return;
-    var inner = $('.bio__inner', dlg);
+    var inner = $('.bio__inner', dlg), bt = $('.bio__text', dlg), closing = false;
+    var pic = $('.bio__img img', dlg);
+    // warm the photo as soon as the presenter card is near the screen
+    if ('IntersectionObserver' in window && pic) {
+      var warm = new IntersectionObserver(function (es) { if (es[0].isIntersecting) { if (pic.decode) pic.decode().catch(function () {}); warm.disconnect(); } }, { rootMargin: '400px' });
+      warm.observe(btn);
+    }
+    var finish = function () { dlg.classList.remove('is-out'); dlg.close(); };
     var close = function () {
-      var done = function () { dlg.close(); };
-      if (window.gsap && root.classList.contains('motion')) {
-        var mobile = !window.matchMedia('(min-width: 900px)').matches;
-        gsap.to(inner, mobile ? { yPercent: 100, duration: 0.45, ease: 'power3.in', onComplete: done } : { opacity: 0, scale: 0.97, duration: 0.3, ease: 'power2.in', onComplete: done });
-      } else done();
+      if (closing || !dlg.open) return; closing = true;
+      dlg.classList.remove('is-in'); dlg.classList.add('is-out');
+      var done = false, end = function () { if (done) return; done = true; finish(); };
+      inner.addEventListener('transitionend', function te(e) { if (e.target === inner) { inner.removeEventListener('transitionend', te); end(); } });
+      setTimeout(end, 520);
     };
     btn.addEventListener('click', function () {
-      dlg.showModal(); if (lenis) lenis.stop();
-      var bt = $('.bio__text', dlg);
+      closing = false;
+      bt.scrollTop = 0;
+      root.classList.add('modal-open'); if (lenis) lenis.stop();
+      dlg.showModal();
       $('.bio__close', dlg).focus({ preventScroll: true });
-      bt.scrollTop = 0; requestAnimationFrame(function () { bt.scrollTop = 0; });
-      if (window.gsap && root.classList.contains('motion')) {
-        var mobile = !window.matchMedia('(min-width: 900px)').matches;
-        if (mobile) gsap.fromTo(inner, { yPercent: 100 }, { yPercent: 0, duration: 0.6, ease: 'power4.out' });
-        else gsap.fromTo(inner, { opacity: 0, scale: 0.96, xPercent: -50, yPercent: -50 }, { opacity: 1, scale: 1, xPercent: -50, yPercent: -50, duration: 0.55, ease: 'power3.out' });
-        gsap.fromTo($$('.bio__text > *', dlg), { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.6, stagger: 0.04, delay: 0.15, ease: 'power3.out' });
-      }
+      bt.scrollTop = 0;
+      // two frames so the closed state paints first, then the sheet glides in
+      requestAnimationFrame(function () { requestAnimationFrame(function () { dlg.classList.add('is-in'); }); });
     });
     $('.bio__close', dlg).addEventListener('click', close);
     dlg.addEventListener('click', function (e) { if (e.target === dlg) close(); });
     dlg.addEventListener('cancel', function (e) { e.preventDefault(); close(); });
-    dlg.addEventListener('close', function () { if (lenis) lenis.start(); btn.focus({ preventScroll: true }); if (window.gsap) gsap.set(inner, { clearProps: 'all' }); });
+    dlg.addEventListener('close', function () {
+      dlg.classList.remove('is-in', 'is-out');
+      root.classList.remove('modal-open'); if (lenis) lenis.start();
+      btn.focus({ preventScroll: true });
+    });
   });
 
 
