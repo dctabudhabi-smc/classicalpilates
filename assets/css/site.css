@@ -432,7 +432,7 @@ html.js.motion [data-split] .w { display: inline-block; overflow: hidden; vertic
 html.js.motion [data-split] .w > span { display: inline-block; transform: translateY(110%); }
 html.js.motion [data-stagger] > * { opacity: 0; transform: translateY(30px); }
 html.js.motion .hero__media img, html.js.motion .hero__media video { transform: scale(1.18); }
-[data-split] .w > span { will-change: transform; }
+
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
@@ -690,3 +690,20 @@ html.modal-open, html.modal-open body { overflow: hidden; }
 /* ===== v13: module timelines without the final exam step (3 steps) ===== */
 .path { grid-template-columns: repeat(3, 1fr); }
 .path::before, .path__line { right: calc(33.333% - 6.5px); }
+
+/* ===== v14: scroll smoothness ===== */
+/* scroll cue animates transform, not top (no layout work every frame) */
+.hero__scroll i::after { top: 0; height: 40%; transform: translateY(-100%); animation: drip2 2.2s var(--ease) infinite; }
+@keyframes drip2 { to { transform: translateY(250%); } }
+/* header: lighter glass, own compositor layer */
+.nav { transform: translate3d(0,0,0) !important; backface-visibility: hidden; }
+.nav.is-solid { -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); background: rgba(251,248,245,.7); }
+body.menu-open .nav { transform: translate3d(0,0,0) !important; }
+/* marquee and progress on their own layers */
+.marquee__track, .progress { will-change: transform; backface-visibility: hidden; }
+/* touch devices: no permanent layer hints on hero media, let the browser decide */
+html.touch .hero__media img, html.touch .phero__media img, html.touch .phero__media video { will-change: auto; }
+
+/* touch: shorter travel for reveals so content does not slide while the finger scrolls */
+html.js.motion.touch [data-reveal] { transform: translateY(16px); }
+html.js.motion.touch [data-stagger] > *, html.js.motion.touch .masonry.is-laid[data-stagger] .masonry__col > * { transform: translateY(14px); }

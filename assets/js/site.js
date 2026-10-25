@@ -62,6 +62,19 @@
     clearTimeout(window._mT); window._mT = setTimeout(function () { layoutMasonry(); if (window.ScrollTrigger) ScrollTrigger.refresh(); }, 200);
   });
 
+  /* ---------- warm images before they scroll into view (decode off the critical frame) ---------- */
+  if ('IntersectionObserver' in window) {
+    var warmIO = new IntersectionObserver(function (es) {
+      es.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        var im = e.target; warmIO.unobserve(im);
+        if (im.loading === 'lazy') im.loading = 'eager';
+        if (im.decode) im.decode().catch(function () {});
+      });
+    }, { rootMargin: '1400px 0px' });
+    $$('img[loading="lazy"]').forEach(function (im) { warmIO.observe(im); });
+  }
+
   /* ---------- nav ---------- */
   var nav = $('.nav');
   var lastY = null;
@@ -74,9 +87,15 @@
 
   /* ---------- progress ---------- */
   var progress = $('.progress');
+  var maxScroll = 1;
+  var measure = function () { maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight); };
+  measure();
+  window.addEventListener('load', measure);
+  window.addEventListener('resize', function () { clearTimeout(window._pm); window._pm = setTimeout(measure, 150); });
+  if ('ResizeObserver' in window) new ResizeObserver(function () { measure(); }).observe(document.body);
   var onScrollProgress = function (y) {
     if (!progress) return;
-    var h = document.documentElement.scrollHeight - window.innerHeight;
+    var h = maxScroll;
     progress.style.transform = 'scaleX(' + (h > 0 ? Math.min(1, y / h) : 0).toFixed(4) + ')';
   };
 
@@ -352,7 +371,7 @@
   ScrollTrigger.config({ ignoreMobileResize: true, autoRefreshEvents: 'visibilitychange,DOMContentLoaded,load' });
 
   var splitIn = function (el, delay) {
-    return gsap.to($$('.w > span', el), { yPercent: 0, y: 0, duration: 1.1, stagger: 0.045, ease: 'power4.out', delay: delay || 0 });
+    return gsap.to($$('.w > span', el), { yPercent: 0, y: 0, duration: 1.1, stagger: 0.045, ease: 'power4.out', delay: delay || 0, clearProps: 'transform' });
   };
 
   /* hero entrance */
@@ -392,7 +411,7 @@
   /* generic reveals */
   ScrollTrigger.batch('[data-reveal]:not([data-done])', {
     start: 'top 88%', once: true,
-    onEnter: function (els) { gsap.to(els, { opacity: 1, y: 0, duration: 1.1, stagger: 0.12, overwrite: true }); }
+    onEnter: function (els) { gsap.to(els, { opacity: 1, y: 0, duration: touch ? 0.8 : 1.1, stagger: touch ? 0.08 : 0.12, overwrite: true, clearProps: 'transform' }); }
   });
   $$('[data-split]:not([data-done])').forEach(function (el) {
     ScrollTrigger.create({ trigger: el, start: 'top 88%', once: true, onEnter: function () { splitIn(el); } });
@@ -428,18 +447,23 @@
     } });
   });
 
-  /* marquee driven by scroll velocity */
+  /* marquee driven by scroll velocity (width cached, runs only while on screen) */
   $$('.marquee__track').forEach(function (track) {
     var items = track.innerHTML; track.innerHTML = items + items;
-    var x = 0, dir = -1, base = parseFloat(track.dataset.speed || '0.6');
-    var w = function () { return track.scrollWidth / 2; };
-    var vel = 0;
-    ScrollTrigger.create({ trigger: track, start: 'top bottom', end: 'bottom top', onUpdate: function (self) { vel = self.getVelocity() / 300; dir = self.direction === 1 ? -1 : 1; } });
+    var x = 0, dir = -1, base = parseFloat(track.dataset.speed || '0.6'), vel = 0, W = track.scrollWidth / 2, on = false;
+    var remeasure = function () { W = track.scrollWidth / 2 || W; };
+    window.addEventListener('load', remeasure);
+    window.addEventListener('resize', function () { clearTimeout(track._t); track._t = setTimeout(remeasure, 200); });
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(remeasure);
+    ScrollTrigger.create({ trigger: track, start: 'top bottom', end: 'bottom top',
+      onToggle: function (self) { on = self.isActive; },
+      onUpdate: function (self) { vel = self.getVelocity() / 300; dir = self.direction === 1 ? -1 : 1; } });
     gsap.ticker.add(function () {
+      if (!on) return;
       x += (base + Math.min(Math.abs(vel), 8)) * dir;
       vel *= 0.92;
-      var W = w(); if (x <= -W) x += W; if (x > 0) x -= W;
-      track.style.transform = 'translate3d(' + x + 'px,0,0)';
+      if (x <= -W) x += W; if (x > 0) x -= W;
+      track.style.transform = 'translate3d(' + x.toFixed(2) + 'px,0,0)';
     });
   });
 

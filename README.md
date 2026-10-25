@@ -21,7 +21,7 @@ All links between pages and to images use relative paths, so the site also works
 |---|---|---|
 | index.html | Yes | Home: hero, about me, the method, studio gallery, Pilates E-Motion, teacher training, conference, contact |
 | about-me.html | Yes | Same text as the old page, plus a journey timeline and studio photos |
-| about-pilates-method.html | Yes | Method text and quotes, Joseph Pilates archive grid, full classical repertoire (Mat, Reformer, Chair, Cadillac, Barrel) |
+| about-pilates-method.html | Yes | Method text and quotes, Joseph Pilates archive grid, closing Joseph Pilates quote |
 | pilates-emotion.html | Yes | New: the School, Roi as representative in Greece, Gloria Gasperi, APPI |
 | teacher-training.html | Yes | New: brochure content without prices, plus program text from pilatesemotion.com (not the Master Program). Weekends / Intensive toggle: weekends = 3 weekends per M+R module, 2 per C+B+C module; intensive = Mon-Sat (M+R) and Mon-Thu (C+B+C) |
 | athens-classical-pilates-conference.html | Yes | New past-tense version: what happened, presenters, photo grid, film, sponsors |
