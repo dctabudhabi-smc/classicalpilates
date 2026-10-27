@@ -258,6 +258,9 @@
       // two frames so the closed state paints first, then the sheet glides in
       requestAnimationFrame(function () { requestAnimationFrame(function () { dlg.classList.add('is-in'); }); });
     });
+    // the presenter photo opens the same biography
+    var card = btn.closest('.trainer'), photo = card && $('.trainer__img', card);
+    if (photo) photo.addEventListener('click', function () { btn.click(); });
     $('.bio__close', dlg).addEventListener('click', close);
     dlg.addEventListener('click', function (e) { if (e.target === dlg) close(); });
     dlg.addEventListener('cancel', function (e) { e.preventDefault(); close(); });
@@ -284,8 +287,44 @@
         if (window.gsap && root.classList.contains('motion')) gsap.fromTo(items, { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.7, stagger: 0.05, ease: 'power3.out', overwrite: true });
         else items.forEach(function (it) { it.style.opacity = 1; it.style.transform = 'none'; });
         if (window.ScrollTrigger) ScrollTrigger.refresh();
+        // if the reader is deep in the grid, bring the new day's first photos into view
+        var navH = nav ? nav.offsetHeight : 0, top = w.getBoundingClientRect().top;
+        if (top < navH) {
+          var y = window.scrollY + top - navH - 10;
+          if (lenis) lenis.scrollTo(y, { duration: 0.9 }); else window.scrollTo({ top: y, behavior: 'smooth' });
+        }
       });
     });
+
+    /* keep the day switch within reach while browsing the photos:
+       desktop - the switch is sticky under the header (CSS);
+       mobile - a compact floating copy appears at the bottom, thumb-height, only while the grid is on screen */
+    var sw = $('.days__switch', w);
+    if (!sw) return;
+    var fl = sw.cloneNode(true);
+    fl.className = 'days__switch days__float'; fl.removeAttribute('role'); fl.removeAttribute('aria-label'); fl.removeAttribute('data-reveal'); fl.removeAttribute('style');
+    fl.setAttribute('aria-hidden', 'true');
+    var fbtns = $$('.days__btn', fl);
+    fbtns.forEach(function (b, i) {
+      b.removeAttribute('id'); b.removeAttribute('role'); b.removeAttribute('aria-controls'); b.tabIndex = -1;
+      b.addEventListener('click', function () { tabs[i].click(); });
+    });
+    document.body.appendChild(fl); // outside any transformed parent so position: fixed holds
+    var sync = function () { fl.dataset.active = w.dataset.active; fbtns.forEach(function (b, i) { b.setAttribute('aria-selected', tabs[i].getAttribute('aria-selected')); }); };
+    sync();
+    tabs.forEach(function (t) { t.addEventListener('click', sync); });
+    var mq = window.matchMedia('(min-width: 900px)'), ticking = false;
+    var check = function () {
+      ticking = false;
+      var navH = nav ? nav.offsetHeight : 0, vh = window.innerHeight;
+      var r = w.getBoundingClientRect(), sr = sw.getBoundingClientRect();
+      sw.classList.toggle('is-stuck', mq.matches && r.top < navH + 14 && r.bottom > navH + 120);
+      fl.classList.toggle('is-on', !mq.matches && sr.bottom < navH && r.bottom > vh * 0.55);
+    };
+    var onScroll = function () { if (!ticking) { ticking = true; requestAnimationFrame(check); } };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    check();
   });
 
 

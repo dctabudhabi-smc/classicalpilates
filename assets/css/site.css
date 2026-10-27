@@ -699,3 +699,20 @@ html.modal-open, html.modal-open body { overflow: hidden; }
 /* ===== v13: module timelines without the final exam step (3 steps) ===== */
 .path { grid-template-columns: repeat(3, 1fr); }
 .path::before, .path__line { right: calc(33.333% - 6.5px); }
+
+/* v16: presenter photo opens the biography */
+.trainer__img { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+
+/* v17: day switch stays within reach while browsing the conference photos */
+@media (min-width: 900px) {
+  .days__switch { position: sticky; top: calc(var(--nav-h) + 12px); z-index: 20; background: rgba(251,248,245,.88); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); transition: box-shadow .4s, border-color .4s; }
+  .days__switch.is-stuck { box-shadow: 0 10px 30px rgba(59,20,49,.14); border-color: rgba(59,20,49,.12); }
+}
+.days__float { position: fixed; left: 50%; bottom: calc(14px + env(safe-area-inset-bottom, 0px)); z-index: 50; margin: 0; padding: 4px; display: grid; background: rgba(251,248,245,.9); -webkit-backdrop-filter: blur(14px) saturate(1.2); backdrop-filter: blur(14px) saturate(1.2); border-color: rgba(59,20,49,.14); box-shadow: 0 10px 30px rgba(36,9,29,.22); transform: translate3d(-50%, 140%, 0); opacity: 0; pointer-events: none; transition: transform .5s var(--ease), opacity .35s; }
+.days__float.is-on { transform: translate3d(-50%, 0, 0); opacity: 1; pointer-events: auto; }
+.days__float .days__pill { top: 4px; bottom: 4px; left: 4px; width: calc((100% - 8px) / 3); }
+.days__float[data-active="2"] .days__pill { transform: translateX(100%); }
+.days__float[data-active="3"] .days__pill { transform: translateX(200%); }
+.days__float .days__btn { padding: 10px 16px; min-width: 76px; font-size: 10px; letter-spacing: .18em; }
+@media (min-width: 900px) { .days__float { display: none; } }
+html.modal-open .days__float { opacity: 0; pointer-events: none; }
