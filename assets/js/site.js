@@ -481,8 +481,15 @@
   });
 
   /* collage drift */
-  if (!touch) $$('.collage > *').forEach(function (c, i) {
-    gsap.fromTo(c, { y: 10 + i * 5 }, { y: -(8 + i * 5), ease: 'none', scrollTrigger: { trigger: c.parentElement, start: 'top bottom', end: 'bottom top', scrub: true } });
+  /* collage: each photo slides into place as the section scrolls in */
+  $$('.collage').forEach(function (col) {
+    var from = [{ x: -70, y: 90 }, { x: 70, y: 140 }, { x: 60, y: 160 }, { x: -60, y: 200 }];
+    var tl = gsap.timeline({ scrollTrigger: { trigger: col, start: 'top 95%', end: touch ? 'center 55%' : 'center 50%', scrub: touch ? 0.6 : 1 } });
+    $$(':scope > *', col).forEach(function (c, i) {
+      var f = from[i % from.length], im = $('img', c);
+      tl.fromTo(c, { x: touch ? f.x * 0.5 : f.x, y: f.y, opacity: 0, clipPath: 'inset(18% 0 0 0)' }, { x: 0, y: 0, opacity: 1, clipPath: 'inset(0% 0 0 0)', ease: 'power2.out', duration: 1 }, i * 0.18);
+      if (im) tl.fromTo(im, { scale: 1.25 }, { scale: 1, ease: 'power2.out', duration: 1.2 }, i * 0.18);
+    });
   });
 
   /* conference band zoom */

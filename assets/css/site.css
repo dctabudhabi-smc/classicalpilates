@@ -661,7 +661,16 @@ dialog.bio.is-out .bio__inner { transform: translate3d(0, 100%, 0); transition-d
 .bio__img img { opacity: 1; }
 .bio__close { position: absolute; z-index: 5; }
 .bio__text > * { transition: opacity .5s ease .2s, transform .5s cubic-bezier(.22,1,.36,1) .2s; }
-dialog.bio:not(.is-in) .bio__text > :nth-child(-n+4) { opacity: 0; transform: translate3d(0, 14px, 0); }
+dialog.bio:not(.is-in) .bio__text > * { opacity: 0; transform: translate3d(0, 14px, 0); }
+.bio__text > :nth-child(2) { transition-delay: 0.26s; }
+.bio__text > :nth-child(3) { transition-delay: 0.32s; }
+.bio__text > :nth-child(4) { transition-delay: 0.38s; }
+.bio__text > :nth-child(5) { transition-delay: 0.44s; }
+.bio__text > :nth-child(6) { transition-delay: 0.50s; }
+.bio__text > :nth-child(7) { transition-delay: 0.56s; }
+.bio__text > :nth-child(8) { transition-delay: 0.62s; }
+.bio__text > :nth-child(n+9) { transition-delay: .62s; }
+dialog.bio.is-out .bio__text > * { transition-delay: 0s; }
 @media (min-width: 900px) {
   .bio__inner {
     top: 0; bottom: 0; left: 0; right: 0; margin: auto;
